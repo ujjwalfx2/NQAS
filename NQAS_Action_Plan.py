@@ -6,6 +6,8 @@ from io import BytesIO
 import io
 import base64
 from PIL import Image
+import matplotlib.pyplot as plt
+import streamviz
 
 
 def generate_excel_download_link(df,fn):
@@ -132,32 +134,50 @@ if user_input is not None:
 
         # Filtering the DataFrame
         filtered_df = filter_dataframe(df, user_input)
-        ifnew_filtered_df=filtered_df
-        # Displaying the filtered DataFrame
+        original_df=filtered_df
+        # store filtered DataFrame without password
         filtered_df = filtered_df.iloc[:, 1:]
         sorted_df = filtered_df.sort_values(by=['Score','Area of Concern', 'Standard','ME_Code'])
         Facility_Name=sorted_df.iloc[0]["Facility name"]
         container.markdown(f"""<div style="border: 2px solid #4CAF50; background-color: #f9f9f9; padding: 5px; border-radius: 10px; width: 60%; margin: 20px auto;text-align: center;"><h4>{Facility_Name}</h4></div>""", unsafe_allow_html=True)
-        
-        #Area of Concern
-        areaofconcernsum = sorted_df.groupby('Area of Concern')['Score'].sum().reset_index()
-        aareaofconcerncount = sorted_df.groupby('Area of Concern')['Score'].count().reset_index()
-        mergedarea=pd.merge(areaofconcernsum,aareaofconcerncount, on=['Area of Concern'], how='outer')
-        mergedarea['% Score'] = ((mergedarea['Score_x'] / (mergedarea['Score_y'] * 2)) * 100)
-        # Formatting percentage to two decimal places
-        mergedarea['% of Score'] = mergedarea['% Score'].map("{:.2f}".format)
-        #display the value with % sign
-        #mergedarea['% of Score'] = mergedarea['% Score'].map("{:.2f}%".format)
-        areaofconcerncount=mergedarea[['Area of Concern','% of Score']]
-        st.write("#### Area of Concern")
-        #st.table(areaofconcerncount)       
-        savearea=formattable(areaofconcerncount)
-        excel_bytes = styled_df_to_excel_bytes(savearea)
-        st.markdown("""<div><br></div>""", unsafe_allow_html=True)
-        downloadbtn(excel_bytes,"Area of Concern.xlsx","area")
+        #col1, col2 = st.columns(2)
+        col1, col2,col3 = st.columns([2,1,2])
+        with col1:
+            #Total Score        
+            facilitycount=len(original_df)        
+            facilityscore=original_df['Score'].sum()        
+            facilityPercent = ((facilityscore / (facilitycount * 2)) * 100)
+            facilityPercent=str("{:.2f}".format(facilityPercent))        
+            #facilityPercent=str("{:.2f}%".format(facilityPercent))
+            #st.write("#### Overall Score")
+            st.markdown("<h4 style='text-align: center; color: black;'>Overall Score</h4>", unsafe_allow_html=True)
+            streamviz.gauge(
+                gVal=float(facilityPercent) , gSize="LRG", 
+                gTitle=" ", gMode="gauge+number",
+                grLow=20, grMid=69.9, 
+                gcLow='#FF1708', gcMid='#FF9400', gcHigh='#1B8720', arTop=100, sFix=' %'
+            )
+
+
+        with col3: 
+            #Area of Concern
+            areaofconcernsum = sorted_df.groupby('Area of Concern')['Score'].sum().reset_index()
+            aareaofconcerncount = sorted_df.groupby('Area of Concern')['Score'].count().reset_index()
+            mergedarea=pd.merge(areaofconcernsum,aareaofconcerncount, on=['Area of Concern'], how='outer')
+            mergedarea['% Score'] = ((mergedarea['Score_x'] / (mergedarea['Score_y'] * 2)) * 100)
+            # Formatting percentage to two decimal places
+            mergedarea['% of Score'] = mergedarea['% Score'].map("{:.2f}".format)
+            #display the value with % sign
+            #mergedarea['% of Score'] = mergedarea['% Score'].map("{:.2f}%".format)
+            areaofconcerncount=mergedarea[['Area of Concern','% of Score']]
+            st.write("#### Area of Concern")
+            #st.table(areaofconcerncount)       
+            savearea=formattable(areaofconcerncount)
+            excel_bytes = styled_df_to_excel_bytes(savearea)
+            st.markdown("""<div><br></div>""", unsafe_allow_html=True)
+            downloadbtn(excel_bytes,"Area of Concern.xlsx","area")
         st.markdown("""<div style="background: linear-gradient(to right, orange, yellow, green, blue, indigo, violet, red); height: 3px; width: 100%;"></div><br><br>""", unsafe_allow_html=True)
-
-
+        
         #Standard wise scoring 
         #Grouping and calculating count, sum, and multiply count by 2 and calculate %
         standardsum = sorted_df.groupby('Standard')['Score'].sum().reset_index()
@@ -206,6 +226,11 @@ if user_input is not None:
         st.markdown("""<div style="background: linear-gradient(to right, orange, yellow, green, blue, indigo, violet, red); height: 3px; width: 100%;"></div><br><br>""", unsafe_allow_html=True)
     else:
         show_floating_message()         
+
+
+
+
+
         
         
 
