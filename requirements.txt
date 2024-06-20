@@ -1,13 +1,11 @@
-matplotlib==3.8.3
-pandas==2.2.2
-Pillow==10.3.0
-streamlit==1.35.0
-streamviz==5.1
 altair==5.3.0
 dash==2.16.1
 hydralit_components==1.0.10
+matplotlib==3.8.3
 numpy==1.26.4
 openpyxl==3.1.2
+pandas==2.2.2
 plotly==5.18.0
+streamlit_option_menu==0.3.12
+streamlit==1.35.0
 XlsxWriter==3.2.0
-
