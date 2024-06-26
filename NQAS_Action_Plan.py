@@ -6,8 +6,8 @@ from io import BytesIO
 import io
 import base64
 from PIL import Image
-import matplotlib.pyplot as plt
-import streamviz
+import plotly.graph_objects as go
+import streamlit.components.v1 as components
 
 
 def generate_excel_download_link(df,fn):
@@ -20,6 +20,53 @@ def generate_excel_download_link(df,fn):
     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download={fn}>Download </a>'
     return st.markdown(href, unsafe_allow_html=True)
 
+def pagecounter():
+     #pagecounter
+    if 'page_count' not in st.session_state: st.session_state.page_count = 0
+    # Increment the page count
+    st.session_state.page_count += 1    
+    st.markdown(f"<div style=padding: 1px;'><h6 style='text-align: center; color: blue;'>Total Visits - {st.session_state.page_count}</h6></div>", unsafe_allow_html=True)      
+
+def gaugechart(facilityPercent):
+    facilityPercent = float(facilityPercent)
+    # Create a gauge chart using Plotly
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=facilityPercent,
+        domain={'x': [0, 1], 'y': [0, 1]},
+        title={'text': "Overall Score", 'font': {'size': 24}},
+        gauge={
+            'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
+            'bar': {'color': "darkblue"},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "gray",
+            'steps': [
+                {'range': [0, 50], 'color': 'cyan'},
+                {'range': [50, 100], 'color': 'royalblue'}
+            ],
+            'threshold': {
+                'line': {'color': "red", 'width': 4},
+                'thickness': 0.75,
+                'value': 35.4
+            }
+        }
+    ))
+    # Update layout for better appearance
+    fig.update_layout(
+        paper_bgcolor="white",
+        font={'color': "darkblue", 'family': "Arial"}
+    )
+    # Display the gauge chart in Streamlit
+    st.plotly_chart(fig, use_container_width=True)
+    # Display score with custom CSS for better styling
+    components.html(f"""
+        <div style='text-align: center;'>
+            <h2 style='color: darkblue;'>Overall Score: <span style='color: red;'>{facilityPercent}%</span></h2>
+        </div>
+        """, height=100)
+    
+#-------------------------------------------
 #show wrong password msg box
 def show_floating_message():
     st.markdown(
@@ -150,14 +197,10 @@ if user_input is not None:
             facilityPercent=str("{:.2f}".format(facilityPercent))        
             #facilityPercent=str("{:.2f}%".format(facilityPercent))
             #st.write("#### Overall Score")
-            st.markdown("<h4 style='text-align: center; color: black;'>Overall Score</h4>", unsafe_allow_html=True)
-            streamviz.gauge(
-                gVal=float(facilityPercent) , gSize="LRG", 
-                gTitle=" ", gMode="gauge+number",
-                grLow=20, grMid=69.9, 
-                gcLow='#FF1708', gcMid='#FF9400', gcHigh='#1B8720', arTop=100, sFix=' %'
-            )
-
+            #st.markdown("<h4 style='text-align: center; color: black;'>Overall Score</h4>", unsafe_allow_html=True)
+            #Calling % gauge chart function
+            gaugechart(facilityPercent)
+            #st.markdown(facilityPercent, unsafe_allow_html=True)
 
         with col3: 
             #Area of Concern
@@ -225,16 +268,7 @@ if user_input is not None:
         generate_excel_download_link(styled_df,processed_filename)
         st.markdown("""<div style="background: linear-gradient(to right, orange, yellow, green, blue, indigo, violet, red); height: 3px; width: 100%;"></div><br><br>""", unsafe_allow_html=True)
     else:
-        show_floating_message()         
+        show_floating_message()   
 
 
-
-
-
-        
-        
-
-        
-                
-
-        
+pagecounter()
