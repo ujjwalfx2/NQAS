@@ -135,8 +135,9 @@ def downloadbtn(df,fn,k):
 
 st.set_page_config(page_title="NQAS Action Plan", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
 
-#load all csv data in dataframe
-df = pd.read_csv("NQAS Action Plan.csv", encoding='unicode_escape')
+#load all csv/xlsx data in dataframe
+#df = pd.read_csv("NQAS Action Plan.csv", encoding='unicode_escape')
+df = pd.read_excel("NQAS Action Plan.xlsx")
 
 # hide menu and footer
 hide_streamlit_style = """
